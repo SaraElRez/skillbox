@@ -1,8 +1,15 @@
 <?php 
 ob_start();
 if (session_status() === PHP_SESSION_NONE) session_start();
+
 $baseUrl = '/skillbox/public';
+
+// Check if user is logged in
 $isLoggedIn = isset($_SESSION['user_id']);
+
+// Get user role from session and normalize
+$role = strtolower($_SESSION['role'] ?? ''); // 'client', 'worker', 'admin', etc.
+$isClient = ($role === 'client');
 ?>
 
 <style>
@@ -29,37 +36,33 @@ $isLoggedIn = isset($_SESSION['user_id']);
   <div class="container text-center">
     <h2 class="mb-4 section-title">Top Mini Services</h2>
     <div class="row g-4">
-
       <div class="col-md-4">
         <div class="card h-100 border-0 shadow-sm">
           <img src="<?= $baseUrl ?>/images/design.jpg" class="card-img-top service-img" alt="Design" loading="lazy">
           <div class="card-body">
             <h5 class="card-title">Social Media Design</h5>
-            <p class="card-text">Eye-catching designs to level up your brand.</p>
+            <p class="card-text">Eye-catching designs made to boost your brand on social platforms.</p>
           </div>
         </div>
       </div>
-
       <div class="col-md-4">
         <div class="card h-100 border-0 shadow-sm">
           <img src="<?= $baseUrl ?>/images/content.jpg" class="card-img-top service-img" alt="Content Writing" loading="lazy">
           <div class="card-body">
             <h5 class="card-title">Copywriting</h5>
-            <p class="card-text">Clear, persuasive text that helps your message stand out.</p>
+            <p class="card-text">Clear, persuasive text that helps your message stand out and convert.</p>
           </div>
         </div>
       </div>
-
       <div class="col-md-4">
         <div class="card h-100 border-0 shadow-sm">
           <img src="<?= $baseUrl ?>/images/Ads.jpg" class="card-img-top service-img" alt="Marketing" loading="lazy">
           <div class="card-body">
             <h5 class="card-title">Mini Ads Setup</h5>
-            <p class="card-text">Quick & effective ad setup to reach the right audience fast.</p>
+            <p class="card-text">Quick and effective ad setup to reach the right audience fast.</p>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
@@ -71,71 +74,78 @@ $isLoggedIn = isset($_SESSION['user_id']);
     <div class="row g-4">
       <div class="col-md-4">
         <h5 class="fw-bold text-teal">💡Turn Skills Into Opportunities</h5>
-        <p>Help talented individuals showcase their skills and access Real job opportunities easily.</p>
+        <p>Help talented individuals showcase their skills and access real job opportunities easily.</p>
       </div>
       <div class="col-md-4">
         <h5 class="fw-bold text-teal">⚡Find the Right Service</h5>
-        <p>Connect clients with the right experts to get work done And grow their business.</p>
+        <p>Connect clients with the right experts to get work done and grow their business.</p>
       </div>
       <div class="col-md-4">
         <h5 class="fw-bold text-teal">🛡️Simple, Secure, Reliable</h5>
-        <p>A user-friendly and secure platform designed for both Buyers and sellers.</p>
+        <p>A user-friendly and secure platform designed for both buyers and sellers.</p>
       </div>
     </div>
   </div>
 </section>
 
+<?php
+// Show AI section only if user is a client or not logged in
+if (!$isLoggedIn || $role === 'client'):
+?>
 <!-- AI Chatbot Section -->
 <section class="py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow-lg border-0">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-robot me-2"></i>
-                            AI Assistant - Find Your Perfect Service
-                        </h5>
-                        <small>Describe what you need, and we'll match you with the best service and worker!</small>
-                    </div>
-                    <div class="card-body">
-                        <?php if (!$isLoggedIn): ?>
-                            <div class="text-center py-4">
-                                <i class="fas fa-lock fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted mb-3">Login Required</h5>
-                                <p class="text-muted mb-4">Please log in to use the AI Assistant and get personalized service recommendations.</p>
-                                <a href="<?= $baseUrl ?>/login" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-sign-in-alt me-2"></i> Login to Continue
-                                </a>
-                            </div>
-                        <?php else: ?>
-                            <div class="mb-3">
-                                <textarea id="aiQuestion" class="form-control" rows="3"
-                                    placeholder="Example: I need someone to design social media posts for my business..."></textarea>
-                            </div>
-                            <button id="askAiBtn" class="btn btn-primary w-100">
-                                <span id="btnText">Ask AI</span>
-                            </button>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-lg border-0">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              <i class="fas fa-robot me-2"></i>
+              AI Assistant - Find Your Perfect Service
+            </h5>
+            <small>Describe what you need, and we'll match you with the best service and worker!</small>
+          </div>
+          <div class="card-body">
+            <?php if (!$isLoggedIn): ?>
+              <!-- Login Required for guests -->
+              <div class="text-center py-4">
+                <i class="fas fa-lock fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted mb-3">Login Required</h5>
+                <p class="text-muted mb-4">Please log in to use the AI Assistant and get personalized service recommendations.</p>
+                <a href="<?= $baseUrl ?>/login" class="btn btn-primary btn-lg">
+                  <i class="fas fa-sign-in-alt me-2"></i> Login to Continue
+                </a>
+              </div>
+            <?php else: ?>
+              <!-- AI Interface for logged-in clients -->
+              <div class="mb-3">
+                <textarea id="aiQuestion" class="form-control" rows="3"
+                  placeholder="Example: I need someone to design social media posts for my business..."></textarea>
+              </div>
+              <button id="askAiBtn" class="btn btn-primary w-100">
+                <span id="btnText">Ask AI</span>
+              </button>
 
-                            <div id="aiAnswer" class="mt-4 d-none">
-                                <div class="alert alert-info">
-                                    <div id="aiReply" style="white-space: pre-line;"></div>
-                                </div>
-                                <div id="serviceInfo"></div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+              <div id="aiAnswer" class="mt-4 d-none">
+                <div class="alert alert-info">
+                  <div id="aiReply" style="white-space: pre-line;"></div>
                 </div>
-            </div>
+                <div id="serviceInfo"></div>
+              </div>
+            <?php endif; ?>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </section>
 
 <script>
 const isLoggedIn = <?= json_encode($isLoggedIn) ?>;
+const role = <?= json_encode($role) ?>;
 
-<?php if ($isLoggedIn): ?>
-// Only initialize chatbot functionality if user is logged in
+<?php if ($isLoggedIn && $role === 'client'): ?>
+// Initialize chatbot functionality only for logged-in clients
 document.getElementById('askAiBtn').addEventListener('click', async () => {
     const input = document.getElementById('aiQuestion');
     const out = document.getElementById('aiAnswer');
@@ -144,13 +154,12 @@ document.getElementById('askAiBtn').addEventListener('click', async () => {
     const btn = document.getElementById('askAiBtn');
     const btnText = document.getElementById('btnText');
     const text = input.value.trim();
-    
+
     if (!text) {
         alert('Please describe what you need!');
         return;
     }
 
-    // Show loading state
     btn.disabled = true;
     btnText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Thinking...';
     out.classList.remove('d-none');
@@ -163,7 +172,7 @@ document.getElementById('askAiBtn').addEventListener('click', async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: text })
         });
-        
+
         const data = await res.json();
 
         if (!data.success) {
@@ -173,22 +182,16 @@ document.getElementById('askAiBtn').addEventListener('click', async () => {
             return;
         }
 
-        // Display reply
         replyDiv.textContent = data.reply;
 
-        // Show service and worker info if available
         if (data.service && data.worker) {
             let infoHtml = '<div class="card border-success">';
             infoHtml += '<div class="card-body">';
             infoHtml += '<h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Recommended Match</h6>';
             infoHtml += `<p class="mb-1"><strong>Service:</strong> <a href="${baseUrl}/services/${data.service.id}">${data.service.title}</a></p>`;
             infoHtml += `<p class="mb-1"><strong>Worker:</strong> ${data.worker.full_name}</p>`;
-            if (data.worker.email) {
-                infoHtml += `<p class="mb-1"><strong>Email:</strong> <a href="mailto:${data.worker.email}">${data.worker.email}</a></p>`;
-            }
-            if (data.worker.phone) {
-                infoHtml += `<p class="mb-0"><strong>Phone:</strong> <a href="tel:${data.worker.phone}">${data.worker.phone}</a></p>`;
-            }
+            if (data.worker.email) infoHtml += `<p class="mb-1"><strong>Email:</strong> <a href="mailto:${data.worker.email}">${data.worker.email}</a></p>`;
+            if (data.worker.phone) infoHtml += `<p class="mb-0"><strong>Phone:</strong> <a href="tel:${data.worker.phone}">${data.worker.phone}</a></p>`;
             infoHtml += '</div></div>';
             serviceInfo.innerHTML = infoHtml;
         }
@@ -202,7 +205,6 @@ document.getElementById('askAiBtn').addEventListener('click', async () => {
     }
 });
 
-// Allow Enter key to submit (Shift+Enter for new line)
 document.getElementById('aiQuestion').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -211,6 +213,8 @@ document.getElementById('aiQuestion').addEventListener('keydown', function(e) {
 });
 <?php endif; ?>
 </script>
+<?php endif; ?>
+
 
 <?php
 $content = ob_get_clean();
