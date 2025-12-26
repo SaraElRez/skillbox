@@ -89,7 +89,7 @@
               <?php endif; ?>
             </div>
 
-            <!-- Role -->
+             <!-- Role -->
             <div class="mb-4">
               <label class="form-label fw-semibold d-block">Select Your Role</label>
               <select name="requested_role" class="form-select" required>

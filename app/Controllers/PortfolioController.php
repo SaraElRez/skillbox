@@ -33,75 +33,88 @@ class PortfolioController
         require __DIR__ . '/../../views/submitCv.php';
     }
 
-    public function store()
-    {
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        if (!isset($_SESSION['user_id'])) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Unauthorized']);
-            exit;
-        }
-
-        // Get the role ID from form
-        $roleId = $_POST['requested_role'] ?? null;
-
-
-        if (!$roleId) {
-            $_SESSION['toast_message'] = 'Invalid role selected';
-            $_SESSION['toast_type'] = 'danger';
-            header("Location: {$this->baseUrl}/portfolio");
-            exit;
-        }
-
-        $data = [
-            'user_id'        => $_SESSION['user_id'],
-            'full_name'      => htmlspecialchars($_POST['fullname'] ?? ''),
-            'email'          => htmlspecialchars($_POST['email'] ?? ''),
-            'phone'          => htmlspecialchars($_POST['phone'] ?? ''),
-            'address'        => htmlspecialchars($_POST['address'] ?? ''),
-            'linkedin'       => htmlspecialchars($_POST['linkedin'] ?? ''),
-            'requested_role' => (int)$roleId,
-            'attachment_path' => null,
-        ];
-
-        // Upload file
-        if (!empty($_FILES['attachment']['name'])) {
-            $userId = $_SESSION['user_id'];
-            $uploadDir = __DIR__ . "/../../public/uploads/portfolios/{$userId}/";
-
-            // Create user folder if not exists
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-
-            // Rename file: userId_YYYYMMDD_CV.pdf
-            $date = date('Ymd');
-            $fileName = "{$userId}_{$date}_CV.pdf";
-            $target = $uploadDir . $fileName;
-
-            // Check file type
-            $type = strtolower(pathinfo($_FILES['attachment']['name'], PATHINFO_EXTENSION));
-            if ($type !== 'pdf') {
-                $_SESSION['toast_message'] = 'Only PDF files allowed';
-                $_SESSION['toast_type'] = 'danger';
-                header("Location: {$this->baseUrl}/portfolio");
-                exit;
-            }
-
-            if (move_uploaded_file($_FILES['attachment']['tmp_name'], $target)) {
-                // Store relative path
-                $data['attachment_path'] = "public/uploads/portfolios/{$userId}/{$fileName}";
-            }
-        }
-
-
-        $portfolioId = Portfolio::create($data);
-
-        // ✅ Attach selected services
-        Portfolio::attachServices($portfolioId, $_POST['services'] ?? []);
-
-        $_SESSION['toast_message'] = 'Portfolio submitted successfully';
-        $_SESSION['toast_type'] = 'success';
-        header("Location: {$this->baseUrl}/");
+public function store()
+{
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    if (!isset($_SESSION['user_id'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
     }
+
+    // Get the role ID from form
+    $roleId = $_POST['requested_role'] ?? null;
+    
+
+
+    if (!$roleId) {
+        $_SESSION['toast_message'] = 'Invalid role selected';
+        $_SESSION['toast_type'] = 'danger';
+        header("Location: {$this->baseUrl}/submit-cv");
+        exit;
+    }
+
+    $data = [
+        'user_id'        => $_SESSION['user_id'],
+        'full_name'      => htmlspecialchars($_POST['fullname'] ?? ''),
+        'email'          => htmlspecialchars($_POST['email'] ?? ''),
+        'phone'          => htmlspecialchars($_POST['phone'] ?? ''),
+        'address'        => htmlspecialchars($_POST['address'] ?? ''),
+        'linkedin'       => htmlspecialchars($_POST['linkedin'] ?? ''),
+        'requested_role' => (int)$roleId,
+        'attachment_path' => null,
+    ];
+
+    // Upload file
+    if (!empty($_FILES['attachment']['name'])) {
+        // Check file size (15MB = 15 * 1024 * 1024 bytes)
+        $maxSize = 15 * 1024 * 1024;
+        $fileSize = $_FILES['attachment']['size'];
+        
+        if ($fileSize > $maxSize) {
+            $fileSizeMB = round($fileSize / (1024 * 1024), 2);
+            $_SESSION['toast_message'] = "File size too large ({$fileSizeMB}MB). Maximum allowed size is 5MB";
+            $_SESSION['toast_type'] = 'danger';
+            header("Location: {$this->baseUrl}/submit-cv");
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $uploadDir = __DIR__ . "/../../public/uploads/portfolios/{$userId}/";
+
+        // Create user folder if not exists
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+        // Rename file: userId_YYYYMMDD_CV.pdf
+        $date = date('Ymd');
+        $fileName = "{$userId}_{$date}_CV.pdf";
+        $target = $uploadDir . $fileName;
+
+        // Check file type
+        $type = strtolower(pathinfo($_FILES['attachment']['name'], PATHINFO_EXTENSION));
+        if ($type !== 'pdf') {
+            $_SESSION['toast_message'] = 'Only PDF files allowed';
+            $_SESSION['toast_type'] = 'danger';
+            header("Location: {$this->baseUrl}/submit-cv");
+            exit;
+        }
+
+        if (move_uploaded_file($_FILES['attachment']['tmp_name'], $target)) {
+            // Store relative path
+            $data['attachment_path'] = "public/uploads/portfolios/{$userId}/{$fileName}";
+        }
+    }
+
+
+    $portfolioId = Portfolio::create($data);
+
+    // ✅ Attach selected services
+    Portfolio::attachServices($portfolioId, $_POST['services'] ?? []);
+
+    $_SESSION['toast_message'] = 'Portfolio submitted successfully';
+    $_SESSION['toast_type'] = 'success';
+    header("Location: {$this->baseUrl}/");
+}
 
     // Delete a portfolio (only if pending)
     public function deletePortfolio($id)
