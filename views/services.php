@@ -12,7 +12,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
 <section class="services-section">
   <div class="container">
     <h2 class="section-title text-center">What We Offer</h2>
-    <p class="section-subtitle">Transform your business with our premium creative services</p>
+    <p class="section-subtitle">Transform your business with our premium creative services!</p>
     <div class="row g-4">
 
       <?php 

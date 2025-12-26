@@ -13,7 +13,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     <i class="fas fa-comments me-3"></i>
                     My Conversations
                 </h1>
-                <p class="page-subtitle">Connect and communicate with your service providers</p>
+
             </div>
         </div>
 

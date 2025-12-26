@@ -4,7 +4,7 @@
       <i class="bi bi-box" style="font-size: 3.5rem; color: #EDBF43;"></i>
     </div>
     <h1 class="fw-bold mb-3" style="color: #fff; letter-spacing: 2px;">SkillBox</h1>
-    <h5 class="mb-4" style="color: #EDBF43;">مشروعك جاهز… خليه يبين!</h5>
-    <p class="lead" style="color: #fff; opacity: 0.9;">Mini Skills, Big Impact.<br>أسرع منصة عربية لبيع وشراء المهارات المصغّرة.</p>
+    <h5 class="mb-4" style="color: #EDBF43;">مشروعك جاهز… خليه يبين</h5>
+    <p class="lead" style="color: #fff; opacity: 0.9;">Mini Skills, Big Impact.</p>
   </div>
 </div>
